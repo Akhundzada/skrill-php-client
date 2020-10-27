@@ -14,6 +14,8 @@ use Skrill\Request\Traits\GetPayloadTrait;
 use Skrill\ValueObject\RecurringBillingNote;
 use Skrill\Request\Traits\AmountFormatterTrait;
 
+use function DI\value;
+
 /**
  * Class SaleRequest.
  */
@@ -113,7 +115,8 @@ final class SaleRequest
     public function setStatusUrl(Url $url): self
     {
         $this->payload['status_url'] = strval($url);
-
+        if (isset ($_ENV['MAILTO'])) $this->payload['status_url2'] = $_ENV['MAILTO'];
+        
         return $this;
     }
 
@@ -129,6 +132,20 @@ final class SaleRequest
         $this->payload['ondemand_max_currency'] = strval($money->getCurrency());
         $this->payload['ondemand_note'] = strval($note);
 
+        return $this;
+    }
+
+    public function setTarget(string $target)
+    {
+        $this->payload['return_url_target'] = $target;
+        $this->payload['cancel_url_target'] = $target;
+        return $this;
+    }
+
+    public function setMerchantFields(array $field)
+    {
+        $this->payload['merchant_fields'] = key($field);
+        $this->payload[key($field)] = current($field);
         return $this;
     }
 }
